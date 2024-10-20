@@ -8,7 +8,7 @@ const {MongoClient, ServerApiVersion, ObjectId} = require('mongodb');
 
 const {default: axios} = require('axios');
 
-const port = process.env.port || 8000;
+const port = process.env.port || 5000;
 
 const corsOption ={
     origin: ['http://localhost:5173', 'http://localhost:5174'],
@@ -16,7 +16,7 @@ const corsOption ={
     optionSuccessStatus: 200,
 }
 
-app.use(cors);
+app.use(cors(corsOption));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded());
@@ -35,7 +35,17 @@ async function run() {
         const db = client.db('OnlineShop');
         const usersCollection = db.collection('users');
 
-        
+        app.post('/users', async(req, res) =>{
+            try{
+                const {name, email, photoURL, role} = req.body;
+                const result = await usersCollection.insertOne({name, email, photoURL, role})
+                res.status(201).json({ message: 'User created successfully', userId: result.insertedId });
+            }
+            catch (err){
+                console.error(err);
+                res.status(500).json({ error: 'An error occurred while creating the user' });
+            }
+        })
 
     } finally{
 
